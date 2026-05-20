@@ -1,22 +1,26 @@
 openapi: 3.1.0
 info:
-  # Do not change the title, if the title changes, the import paths will be broken
   title: Api
   version: 0.1.0
-  description: API specification
+  description: Discord Bot Dashboard API
 servers:
   - url: /api
     description: Base API path
 tags:
   - name: health
-    description: Health operations
+  - name: discord
+  - name: tickets
+  - name: warnings
+  - name: xp
+  - name: giveaways
+  - name: logs
+
 paths:
   /healthz:
     get:
       operationId: healthCheck
       tags: [health]
       summary: Health check
-      description: Returns server health status
       responses:
         "200":
           description: Healthy
@@ -24,13 +28,688 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HealthStatus"
+
+  /discord/guilds:
+    get:
+      operationId: listGuilds
+      tags: [discord]
+      summary: List all guilds the bot is in
+      responses:
+        "200":
+          description: List of guilds
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Guild"
+
+  /discord/guilds/{guildId}/channels:
+    get:
+      operationId: listChannels
+      tags: [discord]
+      summary: List text channels in a guild
+      parameters:
+        - name: guildId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: List of channels
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Channel"
+
+  /discord/guilds/{guildId}/roles:
+    get:
+      operationId: listRoles
+      tags: [discord]
+      summary: List roles in a guild
+      parameters:
+        - name: guildId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: List of roles
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Role"
+
+  /discord/guilds/{guildId}/stats:
+    get:
+      operationId: getGuildStats
+      tags: [discord]
+      summary: Get guild statistics
+      parameters:
+        - name: guildId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Guild stats
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GuildStats"
+
+  /discord/guilds/{guildId}/settings:
+    get:
+      operationId: getGuildSettings
+      tags: [discord]
+      summary: Get guild settings
+      parameters:
+        - name: guildId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Guild settings
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GuildSettings"
+    put:
+      operationId: updateGuildSettings
+      tags: [discord]
+      summary: Update guild settings
+      parameters:
+        - name: guildId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/GuildSettingsInput"
+      responses:
+        "200":
+          description: Updated settings
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GuildSettings"
+
+  /discord/guilds/{guildId}/welcome-test:
+    post:
+      operationId: sendWelcomeTest
+      tags: [discord]
+      summary: Send a test welcome message
+      parameters:
+        - name: guildId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SuccessResult"
+
+  /discord/channels/{channelId}/messages:
+    post:
+      operationId: sendMessage
+      tags: [discord]
+      summary: Send a message to a channel
+      parameters:
+        - name: channelId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/MessageInput"
+      responses:
+        "200":
+          description: Message sent
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MessageResult"
+
+  /discord/channels/{channelId}/ticket-panel:
+    post:
+      operationId: setupTicketPanel
+      tags: [discord]
+      summary: Setup ticket panel in a channel
+      parameters:
+        - name: channelId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/TicketPanelInput"
+      responses:
+        "200":
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SuccessResult"
+
+  /tickets:
+    get:
+      operationId: listTickets
+      tags: [tickets]
+      summary: List all tickets
+      parameters:
+        - name: guildId
+          in: query
+          schema:
+            type: string
+        - name: status
+          in: query
+          schema:
+            type: string
+      responses:
+        "200":
+          description: List of tickets
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Ticket"
+
+  /tickets/{ticketId}/messages:
+    get:
+      operationId: listTicketMessages
+      tags: [tickets]
+      summary: Get messages for a ticket
+      parameters:
+        - name: ticketId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: List of messages
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/TicketMessage"
+
+  /warnings:
+    get:
+      operationId: listWarnings
+      tags: [warnings]
+      summary: List all warnings
+      parameters:
+        - name: guildId
+          in: query
+          schema:
+            type: string
+      responses:
+        "200":
+          description: List of warnings
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Warning"
+
+  /xp/leaderboard:
+    get:
+      operationId: getLeaderboard
+      tags: [xp]
+      summary: Get XP leaderboard
+      parameters:
+        - name: guildId
+          in: query
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Leaderboard entries
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/XpEntry"
+
+  /giveaways:
+    get:
+      operationId: listGiveaways
+      tags: [giveaways]
+      summary: List all giveaways
+      parameters:
+        - name: guildId
+          in: query
+          schema:
+            type: string
+      responses:
+        "200":
+          description: List of giveaways
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Giveaway"
+    post:
+      operationId: createGiveaway
+      tags: [giveaways]
+      summary: Create a new giveaway
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/GiveawayInput"
+      responses:
+        "200":
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SuccessResult"
+
+  /audit-logs:
+    get:
+      operationId: listAuditLogs
+      tags: [logs]
+      summary: List audit logs
+      parameters:
+        - name: guildId
+          in: query
+          schema:
+            type: string
+      responses:
+        "200":
+          description: List of audit logs
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/AuditLog"
+
 components:
   schemas:
     HealthStatus:
       type: object
+      required: [status]
       properties:
         status:
           type: string
-      required:
-        - status
 
+    SuccessResult:
+      type: object
+      required: [success]
+      properties:
+        success:
+          type: boolean
+        error:
+          type: ["string", "null"]
+
+    Guild:
+      type: object
+      required: [id, name, memberCount]
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        memberCount:
+          type: integer
+        icon:
+          type: ["string", "null"]
+        description:
+          type: ["string", "null"]
+
+    Channel:
+      type: object
+      required: [id, name, type]
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        type:
+          type: string
+        topic:
+          type: ["string", "null"]
+        position:
+          type: integer
+
+    Role:
+      type: object
+      required: [id, name, color, position]
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        color:
+          type: string
+        position:
+          type: integer
+
+    GuildStats:
+      type: object
+      required: [totalMembers, totalChannels, totalRoles, onlineMembers]
+      properties:
+        totalMembers:
+          type: integer
+        totalChannels:
+          type: integer
+        totalRoles:
+          type: integer
+        onlineMembers:
+          type: integer
+
+    GuildSettings:
+      type: object
+      required: [guildId]
+      properties:
+        id:
+          type: ["integer", "null"]
+        guildId:
+          type: string
+        welcomeEnabled:
+          type: ["boolean", "null"]
+        welcomeChannelId:
+          type: ["string", "null"]
+        welcomeTitle:
+          type: ["string", "null"]
+        welcomeMessage:
+          type: ["string", "null"]
+        welcomeColor:
+          type: ["string", "null"]
+        welcomeShowAvatar:
+          type: ["boolean", "null"]
+        autoRoleEnabled:
+          type: ["boolean", "null"]
+        autoRoleId:
+          type: ["string", "null"]
+        ticketEnabled:
+          type: ["boolean", "null"]
+        ticketChannelId:
+          type: ["string", "null"]
+        ticketCategory:
+          type: ["string", "null"]
+        ticketMessage:
+          type: ["string", "null"]
+        loggingEnabled:
+          type: ["boolean", "null"]
+        loggingChannelId:
+          type: ["string", "null"]
+        moderationEnabled:
+          type: ["boolean", "null"]
+        moderationChannels:
+          type: ["string", "null"]
+        antiSpamEnabled:
+          type: ["boolean", "null"]
+        antiSpamThreshold:
+          type: ["string", "null"]
+        xpEnabled:
+          type: ["boolean", "null"]
+        xpPerMessage:
+          type: ["string", "null"]
+        bannedWords:
+          type: ["string", "null"]
+        updatedAt:
+          type: ["string", "null"]
+
+    GuildSettingsInput:
+      type: object
+      properties:
+        welcomeEnabled:
+          type: boolean
+        welcomeChannelId:
+          type: ["string", "null"]
+        welcomeTitle:
+          type: string
+        welcomeMessage:
+          type: string
+        welcomeColor:
+          type: string
+        welcomeShowAvatar:
+          type: boolean
+        autoRoleEnabled:
+          type: boolean
+        autoRoleId:
+          type: ["string", "null"]
+        ticketEnabled:
+          type: boolean
+        ticketChannelId:
+          type: ["string", "null"]
+        ticketCategory:
+          type: string
+        ticketMessage:
+          type: string
+        loggingEnabled:
+          type: boolean
+        loggingChannelId:
+          type: ["string", "null"]
+        moderationEnabled:
+          type: boolean
+        moderationChannels:
+          type: string
+        antiSpamEnabled:
+          type: boolean
+        antiSpamThreshold:
+          type: string
+        xpEnabled:
+          type: boolean
+        xpPerMessage:
+          type: string
+        bannedWords:
+          type: string
+
+    MessageInput:
+      type: object
+      required: [content]
+      properties:
+        content:
+          type: string
+        imageUrl:
+          type: ["string", "null"]
+
+    MessageResult:
+      type: object
+      required: [id, success]
+      properties:
+        id:
+          type: string
+        success:
+          type: boolean
+
+    TicketPanelInput:
+      type: object
+      required: [guildId]
+      properties:
+        guildId:
+          type: string
+
+    Ticket:
+      type: object
+      required: [id, channelId, userId, username, guildId, status, createdAt]
+      properties:
+        id:
+          type: integer
+        channelId:
+          type: string
+        userId:
+          type: string
+        username:
+          type: string
+        guildId:
+          type: string
+        category:
+          type: ["string", "null"]
+        status:
+          type: string
+          enum: [open, closed]
+        createdAt:
+          type: string
+        closedAt:
+          type: ["string", "null"]
+
+    TicketMessage:
+      type: object
+      required: [id, ticketId, userId, username, content, createdAt]
+      properties:
+        id:
+          type: integer
+        ticketId:
+          type: integer
+        userId:
+          type: string
+        username:
+          type: string
+        content:
+          type: string
+        createdAt:
+          type: string
+
+    Warning:
+      type: object
+      required: [id, userId, username, guildId, count, reason, createdAt]
+      properties:
+        id:
+          type: integer
+        userId:
+          type: string
+        username:
+          type: string
+        guildId:
+          type: string
+        count:
+          type: integer
+        reason:
+          type: string
+        createdAt:
+          type: string
+
+    XpEntry:
+      type: object
+      required: [id, userId, username, guildId, xp, level]
+      properties:
+        id:
+          type: integer
+        userId:
+          type: string
+        username:
+          type: string
+        guildId:
+          type: string
+        xp:
+          type: integer
+        level:
+          type: integer
+        updatedAt:
+          type: string
+
+    Giveaway:
+      type: object
+      required: [id, channelId, guildId, prize, winnersCount, hostId, hostUsername, active, endsAt, createdAt]
+      properties:
+        id:
+          type: integer
+        messageId:
+          type: ["string", "null"]
+        channelId:
+          type: string
+        guildId:
+          type: string
+        prize:
+          type: string
+        winnersCount:
+          type: integer
+        hostId:
+          type: string
+        hostUsername:
+          type: string
+        participants:
+          type: array
+          items:
+            type: string
+        winners:
+          type: array
+          items:
+            type: string
+        active:
+          type: boolean
+        endsAt:
+          type: string
+        createdAt:
+          type: string
+
+    GiveawayInput:
+      type: object
+      required: [channelId, guildId, prize, winnersCount, durationMs, hostId, hostUsername]
+      properties:
+        channelId:
+          type: string
+        guildId:
+          type: string
+        prize:
+          type: string
+        winnersCount:
+          type: integer
+        durationMs:
+          type: integer
+        hostId:
+          type: string
+        hostUsername:
+          type: string
+
+    AuditLog:
+      type: object
+      required: [id, guildId, action, createdAt]
+      properties:
+        id:
+          type: integer
+        guildId:
+          type: string
+        action:
+          type: string
+        userId:
+          type: ["string", "null"]
+        username:
+          type: ["string", "null"]
+        targetId:
+          type: ["string", "null"]
+        targetUsername:
+          type: ["string", "null"]
+        reason:
+          type: ["string", "null"]
+        details:
+          type: ["string", "null"]
+        createdAt:
+          type: string
