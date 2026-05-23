@@ -1,4 +1,4 @@
-FROM node:24-alpine AS builder
+FROM node:24-slim AS builder
 
 WORKDIR /app
 
@@ -19,7 +19,7 @@ COPY artifacts/api-server/ ./artifacts/api-server/
 
 RUN pnpm --filter @workspace/api-server run build
 
-FROM node:24-alpine
+FROM node:24-slim
 
 WORKDIR /app/artifacts/api-server
 
