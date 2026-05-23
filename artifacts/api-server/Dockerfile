@@ -2,7 +2,7 @@ FROM node:24-slim AS builder
 
 WORKDIR /app
 
-RUN corepack enable && corepack prepare pnpm@9 --activate
+RUN npm install -g pnpm
 
 COPY package.json pnpm-workspace.yaml pnpm-lock.yaml tsconfig.base.json tsconfig.json ./
 
@@ -12,7 +12,7 @@ COPY lib/api-spec/package.json ./lib/api-spec/
 COPY lib/api-client-react/package.json ./lib/api-client-react/
 COPY artifacts/api-server/package.json ./artifacts/api-server/
 
-RUN pnpm install --frozen-lockfile
+RUN pnpm install --ignore-scripts
 
 COPY lib/ ./lib/
 COPY artifacts/api-server/ ./artifacts/api-server/
